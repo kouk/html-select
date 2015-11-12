@@ -137,3 +137,36 @@ test('self-closing tag with attribute and trailing slash -- attributes', functio
     s.end();
     s.resume();
 });
+
+
+test('self-closing foreign element tag', function (t) {
+    var expected = [
+        [ 'open', '<div>'],
+        [ 'open', '<svg>'],
+        [ 'open', '<defs>' ],
+        [ 'open', '<circle />'],
+        [ 'close', '</defs>'],
+        [ 'open', '<circle />'],
+        [ 'close', '</svg>'],
+        [ 'close', '</div>'],
+    ];
+    t.plan(expected.length);
+    var s = select('div', function (e) {
+        e.createReadStream().pipe(through.obj(function (row, enc, next) {
+            t.deepEqual(row, expected.shift());
+            next();
+        }));
+    });
+    s.write([ 'open', '<body>' ]);
+    s.write([ 'open', '<div>' ]);
+    s.write([ 'open', '<svg>' ]);
+    s.write([ 'open', '<defs>' ]);
+    s.write([ 'open', '<circle />' ]);
+    s.write([ 'close', '</defs>' ]);
+    s.write([ 'open', '<circle />' ]);
+    s.write([ 'close', '</svg>' ]);
+    s.write([ 'close', '</div>' ]);
+    s.write([ 'close', '</body>' ]);
+    s.end();
+    s.resume();
+});
