@@ -6,6 +6,7 @@ var Duplexer = require('readable-stream').Duplexer;
 var Match = require('./lib/match.js');
 var selfClosing = require('./lib/self_closing.js');
 var getTag = require('./lib/get_tag.js');
+var foreignElement = require('./lib/foreign.js');
 var lang = require('./lib/lang.js');
 
 var nextTick = typeof setImmediate !== 'undefined'
@@ -83,10 +84,16 @@ Plex.prototype.select = function (sel, cb) {
     return this;
 };
 
+Plex.prototype._getNode = function (row) {
+    var node = { parent: this._current, row: row };
+    node.foreign = foreignElement(getTag(node)) || node.parent.foreign;
+    node.selfClosing = node.foreign ? node.markedSelfClosing : selfClosing(node.tag);
+    return node;
+};
+
 Plex.prototype._updateTree = function (row) {
     if (row[0] === 'open') {
-        var node = { parent: this._current, row: row };
-        node.selfClosing = node.parent && selfClosing(getTag(node));
+        var node = this._getNode(row);
         if (!this._current.children) this._current.children = [ node ]
         else this._current.children.push(node);
         this._current = node;
