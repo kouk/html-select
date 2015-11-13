@@ -51,8 +51,8 @@ Plex.prototype._pre = function () {
             }
         }
         
-        if (row[0] === 'open' && tree.selfClosing && tree.parent) {
-            self._current = self._current.parent;
+        if (row[0] === 'open' && tree.selfClosing) {
+            self._current = tree.parent;
         }
         
         if ((matched && tree.selfClosing) || row[0] === 'close') {
